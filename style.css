@@ -1,0 +1,537 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap');
+
+/* --- CSS Variables for Colors & Dimensions --- */
+:root {
+    --primary-green: #4CAF50; /* Field, UI accents */
+    --background-beige: #F5F5DC; /* Outer page area */
+    --accent-yellow: #FFEB3B; /* Interactive elements, highlights */
+    --text-dark: #333; /* Dark gray/black for good contrast */
+    --text-light: #FFF; /* White/light gray for contrast on dark */
+    --opponent-red: #D32F2F; /* Distinct color for opponents */
+
+    /* Entity sizes (These will be set by JS constants and then applied via inline styles or directly here) */
+    /* Keeping them here for general reference, but JS will override player/ball/etc. */
+    --player-size: 50px;
+    --teammate-size: 40px;
+    --opponent-size: 40px;
+    --ball-size: 25px;
+}
+
+/* --- Base Styles --- */
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-beige);
+    color: var(--text-dark);
+    display: flex;
+    flex-direction: column; /* Stack game container and footer */
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden; /* Prevent body scrolling */
+    box-sizing: border-box;
+}
+
+.game-container {
+    background-color: var(--text-light);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    padding: 8px;
+    text-align: center;
+    /* Maximize width/height but allow shrinking if content is smaller */
+    width: calc(100vw - 16px);
+    height: calc(100vh - 16px);
+    max-width: 850px; /* Optional: cap overall max width if desired for large screens */
+    max-height: 600px; /* Optional: cap overall max height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* --- General Screen Styles --- */
+.game-screen {
+    display: flex; /* Always flex, but visibility controlled by `active`/`hidden` */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto; /* Allow scrolling for non-playing screens if content overflows */
+    transition: opacity 0.3s ease; /* Smooth transition */
+}
+
+.game-screen.hidden {
+    display: none; /* Hide with display:none to remove from flow */
+    opacity: 0;
+    pointer-events: none; /* Disable interactions */
+}
+
+.game-screen.active {
+    display: flex; /* Show with flex to maintain layout */
+    opacity: 1;
+    pointer-events: auto; /* Enable interactions */
+}
+
+
+/* Specific adjustments for playing screen to manage its internal layout */
+#playing-screen {
+    justify-content: flex-start; /* Aligns header to top, then field, then controls-bar */
+    overflow-y: hidden; /* Playing screen itself should NOT scroll */
+    flex-grow: 1; /* Playing screen should expand to fill container */
+}
+
+.game-title {
+    font-family: 'Press Start 2P', cursive;
+    color: var(--primary-green);
+    font-size: 1.8em;
+    margin-bottom: 8px;
+    text-shadow: 2px 2px 3px rgba(0,0,0,0.1);
+    flex-shrink: 0;
+}
+
+.football-icon {
+    font-size: 0.8em;
+    vertical-align: middle;
+}
+
+.welcome-message {
+    font-size: 1.2em;
+    margin-top: 10px;
+    color: var(--text-dark);
+}
+
+/* --- Input Group & Buttons (for Start/Difficulty/Game Over screens) --- */
+.input-group, .difficulty-options {
+    margin: 8px 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    width: 100%;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 3px;
+    width: 100%;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+input[type="text"],
+input[type="number"] {
+    padding: 8px 12px;
+    border: 2px solid var(--primary-green);
+    border-radius: 5px;
+    font-size: 1em;
+    outline: none;
+    transition: border-color 0.3s ease;
+    width: 200px;
+    max-width: calc(100% - 16px);
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus {
+    border-color: var(--accent-yellow);
+}
+
+button {
+    background-color: var(--primary-green);
+    color: var(--text-light);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+button:hover {
+    background-color: #43A047;
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+button:focus {
+    outline: 2px solid var(--accent-yellow);
+    outline-offset: 2px;
+}
+
+/* --- Difficulty Screen Specifics --- */
+.difficulty-options label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 7px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    width: fit-content;
+    margin: 0 auto;
+    font-size: 0.9em;
+}
+
+.difficulty-options label:hover {
+    background-color: #e0e0e0;
+}
+
+.difficulty-options input[type="radio"] {
+    margin-right: 8px;
+    transform: scale(1.1);
+    accent-color: var(--primary-green);
+}
+
+/* --- Playing Screen Header (Top UI) --- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+    padding: 3px 5px;
+    border-bottom: 1px solid #eee;
+    flex-wrap: wrap;
+    gap: 5px;
+    flex-shrink: 0;
+    width: 100%;
+    min-height: 25px;
+    box-sizing: border-box;
+}
+
+.game-info-left {
+    flex-shrink: 0;
+    font-size: 0.85em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 45%;
+}
+
+.game-info-right {
+    display: flex;
+    gap: 10px;
+    font-size: 0.8em;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    flex-shrink: 0;
+    max-width: 50%;
+}
+
+.game-info-right p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* --- Football Field Styles (The dominant green area) --- */
+.field-wrapper {
+    flex-grow: 1; /* Takes up available space */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 5px; /* Padding inside the game-container's field area */
+    box-sizing: border-box;
+}
+
+#football-field {
+    /* Fixed dimensions from JS constants */
+    width: 800px; /* FIELD_WIDTH from JS */
+    height: 400px; /* FIELD_HEIGHT from JS */
+
+    background-color: var(--primary-green);
+    border: 5px solid black;
+    border-radius: 0;
+    position: relative; /* For absolute positioning of entities */
+    overflow: hidden; /* Crucial for keeping entities within bounds */
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+    box-sizing: border-box;
+
+    /* Responsive scaling for the fixed-size field */
+    max-width: 100%; /* Allow to shrink to fit parent width */
+    max-height: 100%; /* Allow to shrink to fit parent height */
+    /* Maintain aspect ratio if scaled down. When both max-width/height are 100%,
+       this is often the simplest way to prevent distortion */
+    object-fit: contain; /* Not directly for div, but concept applies with scaling */
+    /* Alternative to object-fit concept: use transform: scale() but it affects children */
+    /* A more robust way to make a fixed-size element responsively fit its container: */
+    transform: scale(var(--field-scale, 1)); /* Will be set by JS on resize if needed */
+    transform-origin: center;
+}
+
+/* Goal Area (the white rectangle at the top center) */
+.goal-area {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30%; /* Relative to field width */
+    height: 15%; /* Relative to field height */
+    background-color: var(--text-light);
+    border: 2px solid black;
+    box-sizing: border-box;
+    z-index: 2;
+}
+
+/* Player's baseline guide */
+.goal-line-guide {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.4); /* White dashed line */
+    border-top: 1px dashed rgba(255, 255, 255, 0.6);
+    z-index: 1;
+    pointer-events: none; /* Non-interactive */
+}
+
+
+/* --- Game Entities (Sizes determined by JS constants) --- */
+.player-entity, .teammate-entity, .opponent-entity, .ball-entity {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: transparent; /* Make text transparent */
+    font-weight: bold;
+    z-index: 10; /* Entities are on top of field markings */
+    background-color: white; /* Default white background for player/ball as per image */
+    border: 2px solid red; /* Red border for player/ball as per image */
+    transition: left 0.05s linear, top 0.05s linear; /* Smooth movement for entities */
+}
+
+/* Specific colors overrides */
+.player-entity {
+    border-color: red;
+    background-color: white;
+}
+
+.teammate-entity {
+    background-color: #d8f2de; /* for teammate */
+    border: none;
+}
+
+.opponent-entity {
+    background-color: var(--opponent-red); /* Red for opponents */
+    border: none;
+}
+
+.ball-entity {
+    background-color: white;
+    border-color: red;
+}
+
+/* Trajectory Guide Line */
+.trajectory-guide-line {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.7);
+    height: 2px;
+    transform-origin: left center;
+    z-index: 5;
+    pointer-events: none;
+}
+
+
+/* Animated Kick Outcome Text */
+.animated-kick-outcome {
+    position: absolute;
+    top: 50%; /* Overlays the center of the field */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Press Start 2P', cursive;
+    font-size: 3em;
+    color: var(--accent-yellow);
+    text-shadow: 4px 4px 5px rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out; /* Faster animation */
+    z-index: 20;
+    pointer-events: none;
+}
+
+.animated-kick-outcome.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* --- Controls Bar (The compact green bar at the very bottom) --- */
+.controls-bar {
+    background-color: var(--primary-green);
+    border: 2px solid black;
+    border-radius: 0;
+    width: 100%;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-height: 80px;
+    color: var(--text-light);
+    font-size: 0.9em;
+}
+
+.controls-bar .angle-input-group {
+    margin: 5px 0;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+}
+
+.controls-bar label {
+    font-size: 0.85em;
+    color: var(--text-light);
+    margin-bottom: 0;
+    width: auto;
+}
+
+.controls-bar input[type="number"] {
+    width: 80px;
+    padding: 5px 8px;
+    font-size: 0.9em;
+    border: 1px solid var(--text-light);
+    background-color: #f0f0f0;
+    color: var(--text-dark);
+}
+
+.controls-bar button {
+    padding: 6px 12px;
+    font-size: 0.9em;
+    background-color: var(--accent-yellow);
+    color: var(--text-dark);
+}
+
+.controls-bar button:hover {
+    background-color: #FFD700;
+}
+
+.pass-feedback, .input-error {
+    margin: 3px 0;
+    font-size: 0.8em;
+    min-height: 1.2em;
+    flex-shrink: 0;
+    color: var(--text-light);
+}
+
+.input-error {
+    color: #FFEB3B;
+    font-weight: bold;
+}
+
+/* --- Game Over Screen Specifics --- */
+.final-score-message {
+    font-size: 1.4em;
+    font-weight: bold;
+    margin: 15px 0;
+    color: var(--primary-green);
+    flex-shrink: 0;
+}
+
+/* --- Footer Note --- */
+.footer-note {
+    font-size: 0.7em;
+    color: #888;
+    margin-top: 5px; /* Small gap between game container and footer */
+    flex-shrink: 0;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 850px) { /* Adjust based on FIELD_WIDTH */
+    .game-container {
+        padding: 5px;
+        width: calc(100vw - 10px);
+        height: calc(100vh - 10px);
+    }
+
+    #football-field {
+        /* On smaller screens, allow field to scale down */
+        transform: scale(var(--field-scale, 1)); /* Controlled by JS */
+        /* Flexbox will center it within .field-wrapper */
+    }
+
+    .game-title {
+        font-size: 1.2em;
+        margin-bottom: 5px;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 2px;
+        gap: 2px;
+        min-height: unset;
+    }
+
+    .game-info-left, .game-info-right {
+        font-size: 0.75em;
+        max-width: 100%;
+        justify-content: center;
+    }
+
+    .controls-bar {
+        padding: 3px 5px;
+        min-height: 60px;
+        font-size: 0.8em;
+    }
+    .controls-bar .angle-input-group {
+        flex-direction: column;
+        gap: 5px;
+    }
+    .controls-bar label {
+        margin-bottom: 0px;
+        width: auto;
+    }
+    .controls-bar input[type="number"] {
+        width: 60px;
+        padding: 3px 5px;
+        font-size: 0.8em;
+    }
+    .controls-bar button {
+        padding: 5px 10px;
+        font-size: 0.8em;
+    }
+    .pass-feedback, .input-error {
+        margin: 2px 0;
+        font-size: 0.7em;
+    }
+    .animated-kick-outcome {
+        font-size: 1.5em; /* Smaller pop-up text */
+    }
+}
+
+/* Even smaller screens (e.g., iPhone SE) */
+@media (max-width: 480px) {
+    .game-title {
+        font-size: 1em;
+    }
+    .game-info-left, .game-info-right {
+        font-size: 0.65em;
+    }
+    .controls-bar label {
+        font-size: 0.75em;
+    }
+    .controls-bar input[type="number"], .controls-bar button {
+        font-size: 0.75em;
+    }
+}

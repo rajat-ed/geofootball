@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoSoccer</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%234CAF50' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z'/%3E%3Cpath fill='%23FFFFFF' d='M11.97 18.23c-1.28 0-2.45-.63-3.17-1.65l-1.93 1.93c.89 1.05 2.15 1.72 3.56 1.72 1.48 0 2.8-.75 3.59-1.92l-1.93-1.93c-.72 1.02-1.89 1.65-3.12 1.65zM12.03 5.77c1.28 0 2.45.63 3.17 1.65l1.93-1.93c-.89-1.05-2.15-1.72-3.56-1.72-1.48 0-2.8.75-3.59 1.92l1.93 1.93c.72 1.02 1.65 1.89 3.12-1.65zM18.23 11.97c0 1.28-.63 2.45-1.65 3.17l1.93 1.93c1.05-.89 1.72-2.15 1.72-3.56 0-1.48-.75-2.8-1.92-3.59l-1.93 1.93c1.02.72 1.65 1.89 1.65 3.12zM5.77 12.03c0-1.28.63-2.45 1.65-3.17L5.49 6.93C4.44 7.82 3.77 9.08 3.77 10.49c0 1.48.75 2.8 1.92 3.59l1.93-1.93c-1.02-.72-1.65-1.89-1.65-3.12zM12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z'/%3E%3C/svg%3E" type="image/svg+xml">
+</head>
+<body>
+    <div class="game-container">
+        <div id="name-input-screen" class="game-screen active">
+            <h1 class="game-title"><span class="football-icon">⚽</span> GeoSoccer <span class="football-icon">⚽</span></h1>
+            <div class="input-group">
+                <label for="player-name">Enter Your Name:</label>
+                <input type="text" id="player-name" placeholder="e.g., Ronaldo" maxlength="15">
+            </div>
+            <button id="next-button">Next</button>
+        </div>
+
+        <div id="difficulty-screen" class="game-screen hidden">
+            <h1 class="game-title">Choose Difficulty</h1>
+            <p id="welcome-message" class="welcome-message">Welcome, Player!</p>
+            <div class="difficulty-options">
+                <label>
+                    <input type="radio" name="difficulty" value="easy" checked> Easy (High Tolerance)
+                </label>
+                <label>
+                    <input type="radio" name="difficulty" value="medium"> Medium (Medium Tolerance)
+                </label>
+                <label>
+                    <input type="radio" name="difficulty" value="hard"> Hard (Low Tolerance)
+                </label>
+                <label>
+                    <input type="radio" name="difficulty" value="pro"> Pro (Very Low Tolerance)
+                </label>
+            </div>
+            <button id="start-game-button">Start Game</button>
+        </div>
+
+        <div id="playing-screen" class="game-screen hidden">
+            <div class="header">
+                <p class="game-info-left">Player: <span id="display-player-name"></span></p>
+                <div class="game-info-right">
+                    <p>Score: <span id="display-score">0</span></p>
+                    <p>Misses: <span id="display-misses">0</span> / <span id="max-misses">3</span></p>
+                    <p>Difficulty: <span id="display-difficulty">Easy</span></p>
+                </div>
+            </div>
+
+            <div class="field-wrapper"> <div id="football-field" class="football-field">
+                    <div class="goal-area"></div>
+                    <div id="goal-line-guide" class="goal-line-guide"></div>
+
+                    <div id="player-entity" class="player-entity"></div>
+                    <div id="teammate-entity" class="teammate-entity"></div>
+                    <div id="ball-entity" class="ball-entity"></div>
+                    <div id="opponent-1" class="opponent-entity"></div>
+                    <div id="opponent-2" class="opponent-entity"></div>
+                    <div id="opponent-3" class="opponent-entity"></div>
+
+                    <div id="trajectory-guide-line" class="trajectory-guide-line"></div>
+                </div>
+            </div>
+
+            <div class="animated-kick-outcome" id="animated-kick-outcome"></div>
+
+            <div class="controls-bar">
+                <div class="angle-input-group">
+                    <label for="angle-input">Kick Angle (0-180°):</label>
+                    <input type="number" id="angle-input" value="90" min="0" max="180">
+                    <button id="pass-button">KICK THE BALL!</button>
+                </div>
+                <p id="pass-feedback" class="pass-feedback"></p>
+                <p id="angle-error" class="input-error"></p>
+            </div>
+        </div>
+
+        <div id="game-over-screen" class="game-screen hidden">
+            <h1 class="game-title">Game Over!</h1>
+            <p id="final-score-message" class="final-score-message"></p>
+            <button id="play-again-button">Play Again</button>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        <p>&copy; <span id="current-year"></span> GeoSoccer by Rajat</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
